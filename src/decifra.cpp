@@ -1,7 +1,6 @@
 /**
-* @file	    cifra_cesar.cpp
-* @brief	programa de criptoanálise que utilize de força bruta para 
-*           quebrar uma mensagem encriptada usando uma cifra de César tradicional.
+* @file	    decifra.cpp
+* @brief	programa de 
 * @author   Valmir Correa (valmircsjr@gmail.com)
 * @date	    08/2018
 */
@@ -15,16 +14,18 @@ using std::cerr;
 using std::string;
 using std::stoi;
 
-#include <cstring>
-
-#include <algorithm>
-
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
 
 #include <cstdlib>
 using std::atoi;
+
+#include <bitset>
+using std::bitset;
+
+#include <cstring>
+#include <algorithm>
 
 /**
 * @brief    Faz a leitura do conteudo do arquivo
@@ -78,39 +79,32 @@ void escrita (string msg, string nome_arq) {
 * @param    data Data
 * @return   Mensagem cifrada
 */
-string decifrar (string msg, int chave) {
+string decifrar (bitset<10> chave_bit) {
 
-    string msg_decifrada = "";
-    int msg_tam = msg.size();
-    char alfabeto_Minuscula[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
-    char alfabeto_Maiuscula[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+    // Base para Permutações
+    int P10[10] = {3,5,2,7,4,10,1,9,8,6};
+    int P8[8] = {6,3,7,4,8,5,10,9};
+    string chave_per = "";
 
-    for (int ii = 0; ii < msg_tam; ii++) {
-        bool achou_letra = false;
-        for (int pp = 0; pp < 26; pp++) {
-            if (msg[ii] == alfabeto_Minuscula[pp]) {
-                achou_letra = true;
-                if (pp >= chave) {
-                    msg_decifrada += alfabeto_Minuscula[(pp-chave)];
-                } else {
-                    msg_decifrada += alfabeto_Minuscula[26-(chave-pp)];
-                }
-                break;
-            } else if (msg[ii] == alfabeto_Maiuscula[pp]) {
-                achou_letra = true;
-                if (pp >= chave) {
-                    msg_decifrada += alfabeto_Maiuscula[(pp-chave)];
-                } else {
-                    msg_decifrada += alfabeto_Maiuscula[26-(chave-pp)];
-                }
-                break;
-            }
-        }
-        if (!achou_letra) {
-            msg_decifrada += msg[ii];
-        }
+    // Permutação inicial com P10 
+    for (int ii = 0; ii < 10; ii++) {
+
+        int indice_per = P10[ii]-1;
+        chave_per     += chave_bit.to_string()[indice_per];
+        
     }
-    return msg_decifrada;
+
+    // Separação
+    char temp_1[5];
+    char temp_2[5];
+
+    for (int ii = 0; ii < 5; ii++) {
+            temp_1[ii] = chave_per[ii];
+            temp_2[ii] = chave_per[ii + 5];
+    }
+
+
+    return chave_per;
 }
 
 /**
@@ -119,29 +113,33 @@ string decifrar (string msg, int chave) {
 int main (int argc, char* argv[]) {
 
     // Verifica se os argumentos foram passados corretamente
-    if (argc != 2) {
+    if (argc < 3) {
         cout << "--> Argumentos inválidos! Use o comando: ";
-        cout << "'./cifra_cesar data/mensagem.txt'" << endl;
+        cout << "'./bin/decifrar chave mensagem.txt saida.txt'" << endl;
         exit(1);
     }
 
-    string arquivo_txt = argv[1];
+    string arquivo_txt = argv[2];
+
+    // Verificando o tamanho da chave
+    if (strlen(argv[1]) != 10) {
+        cerr << "--> Chave invalida!" << endl;
+        cerr << "A chave deve ser uma sequencia de 10 bits" << endl;
+        exit (1);
+    }
 
     // leitura da mensagem
     string msg_cifrada = leitura(arquivo_txt);
 
-    // Tentando decifrar
-    for (int ii = 1; ii < 25; ii++) {
-        string msg_decifrada = decifrar(msg_cifrada, ii);
-        
-        string nome_arq = "data/mensagens_decifradas/mensagem_decifrada_chave_";
-        nome_arq += std::to_string(ii);
-        nome_arq += ".txt";
-        
-        escrita(msg_decifrada, nome_arq);
-    }
+    // Convertendo a chave para trabalhar com os bits
+    string chave_str = argv[1];
+    bitset<10> chave_bit (chave_str);
 
-    cout << "--> Mensagens decifradas em 'data/mensagens_decifradas'!" << endl;
+    cout << "Chave: " << chave_bit << endl;  
+
+    cout << endl << "Permutação inicial (P10): " << decifrar (chave_bit) << endl;
+
+    //cout << "--> Mensagens decifradas em 'data/mensagens_decifradas'!" << endl;
 
     return 0;
 }
