@@ -1,6 +1,6 @@
 /**
-* @file	    cifra.cpp
-* @brief	programa de criptoanálise que encripta uma mensagem cifra de César tradicional.
+* @file	    decifra.cpp
+* @brief	programa de 
 * @author   Valmir Correa (valmircsjr@gmail.com)
 * @date	    08/2018
 */
@@ -14,16 +14,18 @@ using std::cerr;
 using std::string;
 using std::stoi;
 
-#include <cstring>
-
-#include <algorithm>
-
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
 
 #include <cstdlib>
 using std::atoi;
+
+#include <bitset>
+using std::bitset;
+
+#include <cstring>
+#include <algorithm>
 
 /**
 * @brief    Faz a leitura do conteudo do arquivo
@@ -71,48 +73,170 @@ void escrita (string msg, string nome_arq) {
     arquivo.close();
 }
 
+// rotação para chave 1
+string rotacao_esq(char *chave_per) {
+
+    char chave_rotacionada[10];
+    string chave_completa = "";
+
+    for (int ii = 0; ii < 10; ii++) {
+        if (ii == 4) {
+            chave_completa += chave_per[0];
+        } else if ( ii == 9) {
+            chave_completa += chave_per[5];
+        } else {
+            chave_completa += chave_per[ii+1];
+        }
+        
+    }
+    return chave_completa;
+}
+
+/**
+* @brief    CGera chave k1
+* @param    msg Mensagem a ser cifrada
+* @param    data Data
+* @return   Mensagem cifrada
+*/
+string gerar_sub_chave_k1 (bitset<10> chave_bit) {
+     
+    // Base para Permutações
+    int P10[10] = {3,5,2,7,4,10,1,9,8,6};
+    int P8[8] = {6,3,7,4,8,5,10,9};
+    char chave_per[10];
+
+    // Permutação inicial com P10
+    cout << "Permutação inicial (P10): ";
+    for (int ii = 0; ii < 10; ii++) {
+
+        int indice_per = P10[ii]-1;
+        chave_per[ii]  = chave_bit.to_string()[indice_per];
+        cout << chave_per[ii];
+        
+    }
+
+    // Separação e rotação
+    string  chave_rotacionada = rotacao_esq(chave_per);   
+
+    cout << endl << "Rotação a esquerda LS-1: " << chave_rotacionada << endl;
+
+    // Permutação SW (P8)
+    bitset<10> chave_per_p8 (chave_rotacionada);
+    string sub_chave_k1 = "";
+    for (int ii = 0; ii < 8; ii++) {
+
+        int indice_per = P8[ii]-1;
+        sub_chave_k1  += chave_per_p8.to_string()[indice_per];   
+    }
+
+    cout << "sub_chave_k1 : " << sub_chave_k1 << endl;
+   
+    return sub_chave_k1 ;
+}
+
+// Rotação para a chave 2
+string rotacao_esq_2(char *chave_per) {
+
+    char chave_rotacionada[10];
+
+    cout << endl << "teste:   ";
+    for ( int ii = 0; ii < 10; ii++) {
+        cout << chave_per[ii];
+    }
+    string chave_completa = "";
+    chave_completa += chave_per[2];
+    chave_completa += chave_per[3];
+    chave_completa += chave_per[4];
+    chave_completa += chave_per[0];
+    chave_completa += chave_per[1];
+    chave_completa += chave_per[7];
+    chave_completa += chave_per[8];
+    chave_completa += chave_per[9];
+    chave_completa += chave_per[5];
+    chave_completa += chave_per[6];
+
+    return chave_completa;
+}
+
+/**
+* @brief    CGera chave k1
+* @param    msg Mensagem a ser cifrada
+* @param    data Data
+* @return   Mensagem cifrada
+*/
+string gerar_sub_chave_k2 (bitset<10> chave_bit) {
+     
+    // Base para Permutações
+    int P10[10] = {3,5,2,7,4,10,1,9,8,6};
+    int P8[8] = {6,3,7,4,8,5,10,9};
+    char chave_per[10];
+
+    // Permutação inicial com P10
+    cout << "Permutação inicial (P10): ";
+    for (int ii = 0; ii < 10; ii++) {
+
+        int indice_per = P10[ii]-1;
+        chave_per[ii]  = chave_bit.to_string()[indice_per];
+        cout << chave_per[ii];
+        
+    }
+
+    // Separação e rotação
+    string  LS_1 = rotacao_esq(chave_per);
+
+    // ============================ a partir daqui que muda
+    char resultado_LS_1[10];
+    for (int ii = 0; ii < 10; ii++) {
+        resultado_LS_1[ii] = LS_1[ii];
+    }
+
+    // Separação e rotação
+    string  chave_rotacionada = rotacao_esq_2(resultado_LS_1);   
+    cout << endl << "Rotação a esquerda LS-2 duas posições: " << chave_rotacionada << endl;
+
+    // Permutação SW (P8)
+    bitset<10> chave_per_p8 (chave_rotacionada);
+    string sub_chave_k2 = "";
+    for (int ii = 0; ii < 8; ii++) {
+
+        int indice_per = P8[ii]-1;
+        sub_chave_k2  += chave_per_p8.to_string()[indice_per];   
+    }
+
+    cout << "sub_chave_k2 : " << sub_chave_k2 << endl;
+   
+    return sub_chave_k2 ;
+}
+
+bitset<8> funcao_complexa (/*bitset<8> texto_bit,*/ bitset<10> k1, bitset<10> k2 ) {
+
+    int IP[8]       = {2,6,3,1,4,8,5,7};
+    int EP[8]       = {4,1,2,3,2,3,4,1};
+    int S0[4][4]    = {{1,0,3,2}, {3,2,1,0}, {0,2,1,3}, {3,1,3,2}};
+    int S1[4][4]    = {{1,1,2,3}, {2,0,1,3}, {3,0,1,0}, {2,1,0,3}};
+    int P4[4]       = {2,4,3,1};
+    int IP_1[8]     = {4,1,3,5,7,2,8,6};
+}
+
 /**
 * @brief    Cifra a mensagem recebida
 * @param    msg Mensagem a ser cifrada
 * @param    data Data
 * @return   Mensagem cifrada
 */
-string cifrar (string msg, int chave) {
+string decifrar (bitset<10> chave_bit) {
 
-    string msg_cifrada = "";
-    int msg_tam = msg.size();
-    char alfabeto_Minuscula[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
-    char alfabeto_Maiuscula[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+   string k1_str = gerar_sub_chave_k1 (chave_bit);
+   string k2_str = gerar_sub_chave_k2 (chave_bit);
 
-    for (int ii = 0; ii < msg_tam; ii++) {
-        bool achou_letra = false;
-        for (int pp = 0; pp < 26; pp++) {
-            if (msg[ii] == alfabeto_Minuscula[pp]) {
-                achou_letra = true;
-                msg_cifrada += alfabeto_Minuscula[(pp+chave)%26];
-                // if (pp >= chave) {
-                //     msg_cifrada += alfabeto_Minuscula[(pp+chave)%26];
-                // } else {
-                //     msg_cifrada += alfabeto_Minuscula[26-(chave-pp)];
-                // }
-                break;
-            } else if (msg[ii] == alfabeto_Maiuscula[pp]) {
-                achou_letra = true;
-                msg_cifrada += alfabeto_Maiuscula[(pp+chave)%26];
-                // if (pp >= chave) {
-                //     msg_cifrada += alfabeto_Maiuscula[(pp+chave)%26];
-                // } else {
-                //     msg_cifrada += alfabeto_Maiuscula[26-(chave-pp)];
-                // }
-                break;
-            }
-        }
-        if (!achou_letra) {
-            msg_cifrada += msg[ii];
-        }
-    }
-    return msg_cifrada;
+    bitset<10> k1 (k1_str);
+     bitset<10> k2 (k2_str);
+
+   funcao_complexa (k1, k2);
+
+   return "teste";
 }
+
 
 /**
  * Função principal
@@ -120,44 +244,35 @@ string cifrar (string msg, int chave) {
 int main (int argc, char* argv[]) {
 
     // Verifica se os argumentos foram passados corretamente
-    if (argc != 3) {
+    if (argc < 3) {
         cout << "--> Argumentos inválidos! Use o comando: ";
-        cout << "'./cifra chave data/mensagem.txt'" << endl;
-        exit(1);
-    }
-
-    // Garantindo que é um valor numérico
-    for (int ii = 0; ii < (int) strlen(argv[1]); ii++) {
-        if (argv[1][ii] < 48 || argv[1][ii] > 57) {
-            cout << "--> Passe uma chave numérica de 1 a 26 para cifragem !" << endl;
-            exit(1);
-        }
-    }
-
-    // verificando o valor da chave
-    int chave = atoi(argv[1]);
-
-    if (chave < 1 || chave > 26) {
-        cout << "--> Passe uma chave de 1 a 26 para cifragem !" << endl;
+        cout << "'./bin/decifrar chave mensagem.txt saida.txt'" << endl;
         exit(1);
     }
 
     string arquivo_txt = argv[2];
 
+    // Verificando o tamanho da chave
+    if (strlen(argv[1]) != 10) {
+        cerr << "--> Chave invalida!" << endl;
+        cerr << "A chave deve ser uma sequencia de 10 bits" << endl;
+        exit (1);
+    }
 
     // leitura da mensagem
-    string msg = leitura(arquivo_txt);
+    string msg_cifrada = leitura(arquivo_txt);
 
-    // cifrando
-    string msg_cifrada = cifrar(msg, chave);
-    
-    string nome_arq = "data/mensagens_cifradas/mensagem_cifrada_chave_";
-    nome_arq += std::to_string(chave);
-    nome_arq += ".txt";
-    
-    escrita(msg_cifrada, nome_arq);
+    // Convertendo a chave para trabalhar com os bits
+    string chave_str = argv[1];
+    bitset<10> chave_bit (chave_str);
 
-    cout << "--> Mensagem cifrada em 'data/mensagens_cifradas'!" << endl;
+    cout << "Chave: " << chave_bit << endl;  
+
+    decifrar (chave_bit);
+
+    //cout << endl << "Permutação inicial (P10): " << decifrar (chave_bit) << endl;
+
+    //cout << "--> Mensagens decifradas em 'data/mensagens_decifradas'!" << endl;
 
     return 0;
 }

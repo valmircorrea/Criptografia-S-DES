@@ -216,7 +216,6 @@ bitset<8> funcao_complexa (/*bitset<8> texto_bit,*/ bitset<10> k1, bitset<10> k2
     int S1[4][4]    = {{1,1,2,3}, {2,0,1,3}, {3,0,1,0}, {2,1,0,3}};
     int P4[4]       = {2,4,3,1};
     int IP_1[8]     = {4,1,3,5,7,2,8,6};
-
 }
 
 /**
