@@ -1,6 +1,6 @@
 /**
 * @file	    decifra.cpp
-* @brief	programa de 
+* @brief	programa de decifragem usando S-DES
 * @author   Valmir Correa (valmircsjr@gmail.com)
 * @date	    08/2018
 */
@@ -73,10 +73,12 @@ void escrita (string msg, string nome_arq) {
     arquivo.close();
 }
 
-// rotação para chave 1
-string rotacao_esq(char *chave_per) {
+/**
+* @brief    Realiza o shift  a esquerda para a chave k1
+* @param    chave_per chave a ser permutada
+*/
+string shift(char *chave_per) {
 
-    char chave_rotacionada[10];
     string chave_completa = "";
 
     for (int ii = 0; ii < 10; ii++) {
@@ -92,11 +94,11 @@ string rotacao_esq(char *chave_per) {
     return chave_completa;
 }
 
+
 /**
 * @brief    CGera chave k1
-* @param    msg Mensagem a ser cifrada
-* @param    data Data
-* @return   Mensagem cifrada
+* @param    chave_bit Chave em bits
+* @return   subchave k1
 */
 string gerar_sub_chave_k1 (bitset<10> chave_bit) {
      
@@ -116,7 +118,7 @@ string gerar_sub_chave_k1 (bitset<10> chave_bit) {
     }
 
     // Separação e rotação
-    string  chave_rotacionada = rotacao_esq(chave_per);   
+    string  chave_rotacionada = shift(chave_per);   
 
     cout << endl << "Rotação a esquerda LS-1: " << chave_rotacionada << endl;
 
@@ -134,10 +136,11 @@ string gerar_sub_chave_k1 (bitset<10> chave_bit) {
     return sub_chave_k1 ;
 }
 
-// Rotação para a chave 2
-string rotacao_esq_2(char *chave_per) {
-
-    char chave_rotacionada[10];
+/**
+* @brief    Realiza o shift  a esquerda para a chave k2
+* @param    chave_per chave a ser permutada
+*/
+string shift_2(char *chave_per) {
 
     cout << endl << "teste:   ";
     for ( int ii = 0; ii < 10; ii++) {
@@ -159,10 +162,9 @@ string rotacao_esq_2(char *chave_per) {
 }
 
 /**
-* @brief    CGera chave k1
-* @param    msg Mensagem a ser cifrada
-* @param    data Data
-* @return   Mensagem cifrada
+* @brief    CGera chave k2
+* @param    chave_bit Chave em bits
+* @return   subchave k2
 */
 string gerar_sub_chave_k2 (bitset<10> chave_bit) {
      
@@ -182,7 +184,7 @@ string gerar_sub_chave_k2 (bitset<10> chave_bit) {
     }
 
     // Separação e rotação
-    string  LS_1 = rotacao_esq(chave_per);
+    string  LS_1 = shift(chave_per);
 
     // ============================ a partir daqui que muda
     char resultado_LS_1[10];
@@ -191,7 +193,7 @@ string gerar_sub_chave_k2 (bitset<10> chave_bit) {
     }
 
     // Separação e rotação
-    string  chave_rotacionada = rotacao_esq_2(resultado_LS_1);   
+    string  chave_rotacionada = shift_2(resultado_LS_1);   
     cout << endl << "Rotação a esquerda LS-2 duas posições: " << chave_rotacionada << endl;
 
     // Permutação SW (P8)
@@ -208,23 +210,33 @@ string gerar_sub_chave_k2 (bitset<10> chave_bit) {
     return sub_chave_k2 ;
 }
 
+
+/**
+* @brief    Função complexa
+* @param    k1 Chave em bits k1
+* @param    k2 Chave em bits k2
+* @return   Texto com alterado
+*/
 bitset<8> funcao_complexa (/*bitset<8> texto_bit,*/ bitset<10> k1, bitset<10> k2 ) {
 
-    int IP[8]       = {2,6,3,1,4,8,5,7};
-    int EP[8]       = {4,1,2,3,2,3,4,1};
-    int S0[4][4]    = {{1,0,3,2}, {3,2,1,0}, {0,2,1,3}, {3,1,3,2}};
-    int S1[4][4]    = {{1,1,2,3}, {2,0,1,3}, {3,0,1,0}, {2,1,0,3}};
-    int P4[4]       = {2,4,3,1};
-    int IP_1[8]     = {4,1,3,5,7,2,8,6};
+    // int IP[8]       = {2,6,3,1,4,8,5,7};
+    // int EP[8]       = {4,1,2,3,2,3,4,1};
+    // int S0[4][4]    = {{1,0,3,2}, {3,2,1,0}, {0,2,1,3}, {3,1,3,2}};
+    // int S1[4][4]    = {{1,1,2,3}, {2,0,1,3}, {3,0,1,0}, {2,1,0,3}};
+    // int P4[4]       = {2,4,3,1};
+    // int IP_1[8]     = {4,1,3,5,7,2,8,6};
+
+    bitset<8> retorno;
+    return retorno; // apenas para nao da erro
 }
 
 /**
-* @brief    Cifra a mensagem recebida
-* @param    msg Mensagem a ser cifrada
-* @param    data Data
+* @brief    Decifra a mensagem recebida
+* @param    chave_bit Chave 
+* @param    msg Mensagem a ser decifrada
 * @return   Mensagem cifrada
 */
-string decifrar (bitset<10> chave_bit) {
+string decifrar (bitset<10> chave_bit /*, string msg*/) {
 
    string k1_str = gerar_sub_chave_k1 (chave_bit);
    string k2_str = gerar_sub_chave_k2 (chave_bit);
@@ -269,10 +281,6 @@ int main (int argc, char* argv[]) {
     cout << "Chave: " << chave_bit << endl;  
 
     decifrar (chave_bit);
-
-    //cout << endl << "Permutação inicial (P10): " << decifrar (chave_bit) << endl;
-
-    //cout << "--> Mensagens decifradas em 'data/mensagens_decifradas'!" << endl;
 
     return 0;
 }
