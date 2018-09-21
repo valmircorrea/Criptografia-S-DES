@@ -10,10 +10,11 @@ Nota: O programa deverá ser executado em linha de comando, dentro da pasta prin
 * "make clean" = apaga os arquivos objeto e binário;
 * "make" = compila o programa;
 * Execute: ./bin/prog chave mensagem.txt saida.txt
+ 
  Onde:
-      prog é programa que deseja executar (cifra ou decifra)
-      chave é a chave para encripitração ou decripitação
-      mensagem.txt será a mensagem a ser encriptada ou decriptada
-      saida.txt é a saida onde será colocado os dados de cifragem ou decifragem.
+      **prog** é programa que deseja executar (cifra ou decifra)
+      **chave** é a chave para encripitração ou decripitação
+      **mensagem.txt** será a mensagem a ser encriptada ou decriptada
+      **saida.txt** é a saida onde será colocado os dados de cifragem ou decifragem.
       
 
